@@ -1,9 +1,11 @@
-#include <SDL2/SDL.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <stdlib.h>
-
+#include "clavier.h"
+int map[LIGNE][COLONNE] = {
+    {1,1,1,1,1},
+    {1,0,0,0,1},
+    {1,0,0,0,1},
+    {1,0,0,0,1},
+    {1,1,1,1,1}
+};
 
 int main(void){
     int running = 1;
@@ -26,10 +28,13 @@ int main(void){
         printf("%s\n", SDL_GetError());
         exit(1);
     }
-    int x = 320;
-    int y = 240;
+    float x = 100;
+    float y = 100;
     int w = 8,h = 8;
+    float angle = 0;
 
+        
+   
     while(running){
 
         SDL_Event event;//boite d'ordre
@@ -40,27 +45,37 @@ int main(void){
                 printf("UNE TOUCHE EST ENFONCÉE !!! %d\n", event.key.keysym.sym);
             }*/
         }
-        const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        if(keys[SDL_SCANCODE_W]){
-            y-= 1;
-        }
-        if(keys[SDL_SCANCODE_A]){
-            x-= 1;
-        }
-        if(keys[SDL_SCANCODE_S]){
-            y+= 1;
-        }
-        if(keys[SDL_SCANCODE_D]){
-            x+= 1;
-        }
-        
+        gestionTouche(&x,&y,&angle);
+
+
         SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);//met en noir pour clear
         SDL_RenderClear(rend);
-        SDL_SetRenderDrawColor(rend, 238, 130, 238, 255); //met en gris pour le carr
-        SDL_Rect r = { x, y, w, h };
-        SDL_RenderFillRect(rend, &r); // affich le rendu du carre
+
+        //crea de la map
+        for (int i = 0; i < LIGNE; i++) {
+            for (int j = 0; j < COLONNE; j++) {
+                if(map[i][j] == 1){
+                    SDL_SetRenderDrawColor(rend, 52, 100, 156, 255); //met en bleu pour le mur
+                    SDL_Rect r = { j*TAILLE ,i*TAILLE, TAILLE, TAILLE};
+                    SDL_RenderFillRect(rend, &r); // met la couleur au carr
+                    
+                }     
+            }
+        }
+
+        SDL_SetRenderDrawColor(rend, 238, 130, 238, 255); //met en rose pour le carr
+        SDL_Rect r = { x - w/2, y - h/2, w, h };
+        SDL_RenderFillRect(rend, &r); // met la couleur au carr
+
+        //ligne regard
+        int x2 = x + cos(angle) * 20;
+        int y2 = y + sin(angle) * 20;
+        SDL_SetRenderDrawColor(rend,139, 157, 52,255);
+        SDL_RenderDrawLine(rend, x, y, x2, y2);
+
+        //render et fps
         SDL_RenderPresent(rend);
-       
+        SDL_Delay(16); // 60 fps 1000 ms ÷ 16 ms ≈ 62
     }
 
     SDL_DestroyRenderer(rend);
